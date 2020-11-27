@@ -120,7 +120,7 @@ import HomeSwiper from "views/home/childComps/HomeSwiper";
 import HomeRecommendView from "views/home/childComps/HomeRecommendView";
 import FeatureView from "views/home/childComps/FeatureView";
 
-import { getHomeMultidata } from "network/home";
+import { getHomeMultidata, getHomeGoods } from "network/home";
 
 export default {
   components: {
@@ -135,14 +135,41 @@ export default {
     return {
       banners: [],
       recommends: [],
+      goods: {
+        pop: { page: 0, list: [] },
+        new: { page: 0, list: [] },
+        sell: { page: 0, list: [] },
+      },
     };
   },
   created() {
-    getHomeMultidata().then((res) => {
-      console.log(res);
-      this.banners = res.data.banner.list;
-      this.recommends = res.data.recommend.list;
-    });
+    // 使用created生命周期函数可以在页面一旦被创建好就请求数据，链式调用then方法返回数据
+
+    // 请求banner recommend图片等信息
+    this.getHomeMultidata();
+
+    // 请求商品信息
+    this.getHomeGoods("pop");
+    this.getHomeGoods("new");
+    this.getHomeGoods("sell");
+  },
+  methods: {
+    getHomeMultidata() {
+      getHomeMultidata().then((res) => {
+        console.log(res);
+        this.banners = res.data.banner.list;
+        this.recommends = res.data.recommend.list;
+      });
+    },
+    getHomeGoods(type) {
+      const page = this.goods[type].page + 1;
+      getHomeGoods(type, page).then((res) => {
+        this.goods[type].list.push(...res.data.list);
+        this.goods[type].page += 1;
+        console.log(type);
+        console.log(page);
+      });
+    },
   },
 };
 </script>

@@ -16,6 +16,7 @@
 
 <script>
 export default {
+  //   所有子组件的props继承都继承自Home组件
   props: {
     titles: {
       type: Array,
