@@ -3,113 +3,19 @@
     <nav-bar class="home-nav">
       <template v-slot:center>购物街</template>
     </nav-bar>
-    <home-swiper :banners="banners" />
-    <home-recommend-view :recommends="recommends" />
-    <feature-view />
-    <tab-control :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
-    <goods-list :goods="showGoods" />
-    <ul>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-      <li>列表</li>
-    </ul>
+    <scroll
+      class="content"
+      ref="scroll"
+      :probe-type="3"
+      @scroll="contentScroll"
+    >
+      <home-swiper :banners="banners" />
+      <home-recommend-view :recommends="recommends" />
+      <feature-view />
+      <tab-control :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
+      <goods-list :goods="showGoods" />
+    </scroll>
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -117,6 +23,8 @@
 import NavBar from "components/common/navbar/NavBar";
 import TabControl from "components/content/tabControl/TabControl";
 import GoodsList from "components/content/goods/GoodsList";
+import BackTop from "components/content/backTop/BackTop";
+import Scroll from "components/common/scroll/Scroll";
 
 import HomeSwiper from "views/home/childComps/HomeSwiper";
 import HomeRecommendView from "views/home/childComps/HomeRecommendView";
@@ -133,6 +41,8 @@ export default {
     HomeRecommendView,
     FeatureView,
     GoodsList,
+    BackTop,
+    Scroll,
   },
   data() {
     return {
@@ -144,6 +54,7 @@ export default {
         sell: { page: 0, list: [] },
       },
       currentType: "pop",
+      isShowBackTop: false,
     };
   },
   computed: {
@@ -178,6 +89,14 @@ export default {
           break;
       }
     },
+    backClick() {
+      //   console.log(this.$refs);
+      //   直接使用scroll组件中的scrollTo方法
+      this.$refs.scroll.scrollTo(0, 0);
+    },
+    contentScroll(position) {
+      this.isShowBackTop = position.y > -1000 ? false : true;
+    },
 
     //   网络请求相关的方法
     getHomeMultidata() {
@@ -200,9 +119,11 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 #home {
   padding-top: 44px;
+  height: 100vh;
+  position: relative;
 }
 .home-nav {
   background-color: var(--color-tint);
@@ -213,4 +134,16 @@ export default {
   right: 0;
   z-index: 9;
 }
+.content {
+  position: absolute;
+  top: 44px;
+  bottom: 49px;
+  left: 0;
+  right: 0;
+}
+/* .content {
+  height: calc(100% - 93px);
+  overflow: hidden;
+  margin-top: 44px;
+} */
 </style>
