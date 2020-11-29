@@ -8,6 +8,8 @@
       ref="scroll"
       :probe-type="3"
       @scroll="contentScroll"
+      :pull-up-load="true"
+      @pullingUp="loadMore"
     >
       <home-swiper :banners="banners" />
       <home-recommend-view :recommends="recommends" />
@@ -74,7 +76,25 @@ export default {
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
   },
+  mounted() {
+    // 图片加载监听  注意： created里面是拿不到$refs的，只有在组件挂载到DOM中才能拿到，即mounted中
+    const refresh = this.debounce(this.$refs.scroll.refresh, 50);
+    this.$bus.$on("itemImgLoad", () => {
+      console.log(13);
+      //   this.$refs.scroll.refresh();
+      refresh();
+    });
+  },
   methods: {
+    debounce(func, delay) {
+      let timer = null;
+      return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          console.log(this);
+        }, delay);
+      };
+    },
     //   事件监听相关的方法
     tabClick(index) {
       switch (index) {
@@ -91,11 +111,16 @@ export default {
     },
     backClick() {
       //   console.log(this.$refs);
-      //   直接使用scroll组件中的scrollTo方法
+      //   直接使用scroll组件中的scrollTo方法,点击回到顶部
       this.$refs.scroll.scrollTo(0, 0);
     },
     contentScroll(position) {
       this.isShowBackTop = position.y > -1000 ? false : true;
+    },
+    // 上拉加载更多
+    loadMore() {
+      this.getHomeGoods(this.currentType);
+      this.$refs.scroll.scroll.refresh();
     },
 
     //   网络请求相关的方法
@@ -111,6 +136,7 @@ export default {
       getHomeGoods(type, page).then((res) => {
         this.goods[type].list.push(...res.data.list);
         this.goods[type].page += 1;
+        this.$refs.scroll.finishPullUp();
         // console.log(type);
         // console.log(page);
       });

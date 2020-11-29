@@ -29,10 +29,10 @@ export default {
   },
   methods: {
     itemClick() {
-      console.log(this.path);
-      console.log(this.$route.path);
+      //   console.log(this.path);
+      //   console.log(this.$route.path);
       //   console.dir(typeof this.$route.path);
-      console.log(this.$route.path.indexOf(this.path));
+      //   console.log(this.$route.path.indexOf(this.path));
       if (this.$route.path != this.path) {
         this.$router.push(this.path);
       }
