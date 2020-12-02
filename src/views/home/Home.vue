@@ -89,7 +89,7 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
-    console.log(this.goods);
+    // console.log(this.goods);
   },
   mounted() {
     // 图片加载监听  注意： created里面是拿不到$refs的，只有在组件挂载到DOM中才能拿到，即mounted中
