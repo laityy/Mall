@@ -23,6 +23,7 @@ export default {
   },
   methods: {
     imgLoad() {
+      // 事件总线
       this.$bus.$emit("itemImgLoad");
     },
   },

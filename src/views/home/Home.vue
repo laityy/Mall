@@ -3,6 +3,12 @@
     <nav-bar class="home-nav">
       <template v-slot:center>购物街</template>
     </nav-bar>
+    <tab-control
+      :titles="['流行', '新款', '精选']"
+      @tabClick="tabClick"
+      ref="tabControl1"
+      v-show="tabControlShow"
+    />
     <scroll
       class="content"
       ref="scroll"
@@ -11,10 +17,14 @@
       :pull-up-load="true"
       @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperImageLoad.once="swiperImageLoad" />
       <home-recommend-view :recommends="recommends" />
       <feature-view />
-      <tab-control :titles="['流行', '新款', '精选']" @tabClick="tabClick" />
+      <tab-control
+        :titles="['流行', '新款', '精选']"
+        @tabClick="tabClick"
+        ref="tabControl2"
+      />
       <goods-list :goods="showGoods" />
     </scroll>
     <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -33,6 +43,7 @@ import HomeRecommendView from "views/home/childComps/HomeRecommendView";
 import FeatureView from "views/home/childComps/FeatureView";
 
 import { getHomeMultidata, getHomeGoods } from "network/home";
+import { debounce } from "common/utils";
 
 export default {
   components: {
@@ -57,11 +68,14 @@ export default {
       },
       currentType: "pop",
       isShowBackTop: false,
+      tabOffsetTop: 0,
+      tabControlShow: false,
     };
   },
   computed: {
     //   数据在一开始就已经请求过了，点击tabControl返回不同的currentType，在由goodlist渲染不同的页面，本质就是不同的gonds数据渲染不同的页面
     showGoods() {
+      // 将goods作为计算属性   并动态返回给GoodsList子组件
       return this.goods[this.currentType].list;
     },
   },
@@ -71,30 +85,21 @@ export default {
     // 请求banner recommend图片等信息
     this.getHomeMultidata();
 
-    // 请求商品信息
+    // 在组件被创建后直接请求商品信息
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+    console.log(this.goods);
   },
   mounted() {
     // 图片加载监听  注意： created里面是拿不到$refs的，只有在组件挂载到DOM中才能拿到，即mounted中
-    const refresh = this.debounce(this.$refs.scroll.refresh, 50);
+    const refresh = debounce(this.$refs.scroll.refresh, 50);
     this.$bus.$on("itemImgLoad", () => {
-      console.log(13);
       //   this.$refs.scroll.refresh();
       refresh();
     });
   },
   methods: {
-    debounce(func, delay) {
-      let timer = null;
-      return function (...args) {
-        if (timer) clearTimeout(timer);
-        timer = setTimeout(() => {
-          console.log(this);
-        }, delay);
-      };
-    },
     //   事件监听相关的方法
     tabClick(index) {
       switch (index) {
@@ -108,22 +113,34 @@ export default {
           this.currentType = "sell";
           break;
       }
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
+    // 回顶部按钮点击
     backClick() {
       //   console.log(this.$refs);
       //   直接使用scroll组件中的scrollTo方法,点击回到顶部
       this.$refs.scroll.scrollTo(0, 0);
     },
     contentScroll(position) {
+      //  1. 判断backtop是否显示
       this.isShowBackTop = position.y > -1000 ? false : true;
+      //  2.判断tabControl是否吸顶
+      this.tabControlShow = -position.y > this.tabOffsetTop ? true : false;
     },
     // 上拉加载更多
     loadMore() {
       this.getHomeGoods(this.currentType);
       this.$refs.scroll.scroll.refresh();
     },
+    // 监听轮播图片加载完成
+    swiperImageLoad() {
+      this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
+      //   console.log(this.tabOffsetTop);
+    },
 
     //   网络请求相关的方法
+    //首页轮播数据
     getHomeMultidata() {
       getHomeMultidata().then((res) => {
         // console.log(res);
@@ -131,6 +148,7 @@ export default {
         this.recommends = res.data.recommend.list;
       });
     },
+    // 首页商品信息 再次对getHomeGoods进行封转
     getHomeGoods(type) {
       const page = this.goods[type].page + 1;
       getHomeGoods(type, page).then((res) => {
@@ -161,12 +179,14 @@ export default {
   z-index: 9;
 }
 .content {
+  overflow: hidden;
   position: absolute;
   top: 44px;
   bottom: 49px;
   left: 0;
   right: 0;
 }
+
 /* .content {
   height: calc(100% - 93px);
   overflow: hidden;

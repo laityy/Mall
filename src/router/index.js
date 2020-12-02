@@ -19,13 +19,14 @@ export default new vueRouter({
             component: Home
         },
         {
-            path: '/cart',
-            component: Cart
-        },
-        {
             path: '/category',
             component: Category
         },
+        {
+            path: '/cart',
+            component: Cart
+        },
+
         {
             path: '/profile',
             component: Profile
