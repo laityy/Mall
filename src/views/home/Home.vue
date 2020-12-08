@@ -12,7 +12,7 @@
     <scroll
       class="content"
       ref="scroll"
-      :probe-type="3"
+      :probe-type="2"
       @scroll="contentScroll"
       :pull-up-load="true"
       @pullingUp="loadMore"
@@ -70,6 +70,7 @@ export default {
       isShowBackTop: false,
       tabOffsetTop: 0,
       tabControlShow: false,
+      saveY: 0,
     };
   },
   computed: {
@@ -78,6 +79,13 @@ export default {
       // 将goods作为计算属性   并动态返回给GoodsList子组件
       return this.goods[this.currentType].list;
     },
+  },
+  activated() {
+    this.$refs.scroll.scrollTo(0, this.saveY, 0);
+  },
+  deactivated() {
+    console.log(this.$refs.scroll.scroll.y);
+    this.saveY = this.$refs.scroll.scroll.y;
   },
   created() {
     // 使用created生命周期函数可以在页面一旦被创建好就请求数据，链式调用then方法返回数据

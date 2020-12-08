@@ -18,9 +18,9 @@ export default {
       },
     },
   },
-  mounted() {
-    console.log(this.goods);
-  },
+  //   mounted() {
+  //     console.log(this.goods);
+  //   },
 };
 </script>
 
