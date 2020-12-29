@@ -1,5 +1,7 @@
 # supermall
 
+使用vue全家桶开发的商城项目，主要功能就是对服务器请求的数据进行页面渲染。
+
 ## Project setup
 ```
 npm install
