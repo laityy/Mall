@@ -132,6 +132,8 @@ export default {
   background-color: var(--color-tint);
   font-weight: 700;
   color: #fff;
+  position: relative;
+  z-index: 2;
 }
 
 .content {
@@ -140,7 +142,6 @@ export default {
   right: 0;
   top: 44px;
   bottom: 49px;
-
   display: flex;
 }
 
